@@ -1,8 +1,13 @@
 package nba
 
 import (
-	"net/http"
 	"log"
+	"net/http"
+)
+
+const (
+	//LeagueLeadersEndpoint represents the stats nba endpoint for league leaders
+	LeagueLeadersEndpoint = "https://stats.nba.com/stats/leagueLeaders"
 )
 
 //API exposes stats.nba.com endpoints
@@ -32,15 +37,13 @@ func NewClient(client http.Client) Client {
 
 //GetLeagueLeaders returns the current league leaders
 func (c *Client) GetLeagueLeaders(options []APIOption) error {
-	req, err := http.NewRequest("GET", "https://stats.nba.com/stats/leagueLeaders", nil)
+	req, err := http.NewRequest("GET", LeagueLeadersEndpoint, nil)
 	if err != nil {
 		return err
 	}
 	handleOptions(req, options)
-	resp, err := c.client.Do(req)
-	if err != nil {
-		return err
-	}
+	_, err = c.client.Do(req)
+	return err
 }
 
 func handleOptions(req *http.Request, options []APIOption) {
