@@ -1,6 +1,8 @@
 package nba
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net/http"
 )
@@ -36,14 +38,29 @@ func NewClient(client http.Client) Client {
 }
 
 //GetLeagueLeaders returns the current league leaders
-func (c *Client) GetLeagueLeaders(options []APIOption) error {
+func (c *Client) GetLeagueLeaders(options ...APIOption) (ResultSet, error) {
+	var set ResultSet
 	req, err := http.NewRequest("GET", LeagueLeadersEndpoint, nil)
 	if err != nil {
-		return err
+		return set, err
 	}
 	handleOptions(req, options)
-	_, err = c.client.Do(req)
-	return err
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return set, err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return set, err
+	}
+
+	err = json.Unmarshal(body, &set)
+	if err != nil {
+		return set, err
+	}
+
+	return set, err
 }
 
 func handleOptions(req *http.Request, options []APIOption) {
