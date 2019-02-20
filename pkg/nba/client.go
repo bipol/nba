@@ -47,13 +47,13 @@ func NewClient(client http.Client) Client {
 }
 
 //GetLeagueLeaders returns the current league leaders
-func (c *Client) sendRequest(url string, options ...APIOption) (ResponseEnvelope, error) {
+func (c *Client) sendRequest(url string, required map[string]string, options ...APIOption) (ResponseEnvelope, error) {
 	var set ResponseEnvelope
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return set, err
 	}
-	handleOptions(req, options)
+	handleOptions(req, options, required)
 	resp, err := c.client.Do(req)
 	if err != nil {
 		return set, err
@@ -75,7 +75,7 @@ func (c *Client) sendRequest(url string, options ...APIOption) (ResponseEnvelope
 //GetLeagueLeaders returns the current league leaders
 func (c *Client) GetLeagueLeaders(options ...APIOption) ([]LeagueLeaderRow, error) {
 	var rows []LeagueLeaderRow
-	envelope, err := c.sendRequest(LeagueLeadersEndpoint, options...)
+	envelope, err := c.sendRequest(LeagueLeadersEndpoint, LeagueLeaderRequiredFields, options...)
 	if err != nil {
 		return rows, err
 	}
@@ -89,23 +89,36 @@ func (c *Client) GetLeagueLeaders(options ...APIOption) ([]LeagueLeaderRow, erro
 	return rows, err
 }
 
-func handleOptions(req *http.Request, options []APIOption) {
+//GetPlayerStats will return player stats
+func (c *Client) GetPlayerStats(options ...APIOption) ([]LeagueLeaderRow, error) {
+	var rows []LeagueLeaderRow
+	envelope, err := c.sendRequest(PlayersEndpoint, PlayerRequiredFields, options...)
+	if err != nil {
+		return rows, err
+	}
+	for _, row := range envelope.ResultSet.RowSet {
+		var llRow LeagueLeaderRow
+		err = llRow.UnmarshalRawMessage(row)
+		if err == nil {
+			rows = append(rows, llRow)
+		}
+	}
+	return rows, err
+}
+
+func handleOptions(req *http.Request, options []APIOption, required map[string]string) {
 	for _, option := range options {
 		option(req)
 	}
-	defaultArguments(req)
+	defaultArguments(req, required)
 }
 
-//TODO: Expose the other optionals here
-func defaultArguments(req *http.Request) {
+func defaultArguments(req *http.Request, required map[string]string) {
 	q := req.URL.Query()
-	if _, ok := q["PerMode"]; !ok {
-		q.Add("PerMode", "PerGame")
+	for field, val := range required {
+		if _, ok := q[field]; !ok {
+			q.Add(field, val)
+		}
 	}
-	q.Add("LeagueID", "00")
-	q.Add("Scope", "S")
-	q.Add("Season", "2018-19")
-	q.Add("SeasonType", "Regular Season")
-	q.Add("StatCategory", "PTS")
 	req.URL.RawQuery = q.Encode()
 }

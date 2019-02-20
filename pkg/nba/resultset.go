@@ -48,6 +48,34 @@ type LeagueLeaderRow struct {
 	Eff      json.Number `json:"EFF"`
 }
 
+//PlayerRequiredFields outline the required fields for the query
+var PlayerRequiredFields = map[string]string{
+	"PerMode":        "PerGame",
+	"LeagueID":       "00",
+	"Season":         "2018-2019",
+	"SeasonType":     "Regular Season",
+	"LastNGames":     "0",
+	"MeasureType":    "Base",
+	"Month":          "0",
+	"OpponentTeamID": "0",
+	"PORound":        "0",
+	"PaceAdjust":     "N",
+	"Period":         "0",
+	"PlusMinus":      "N",
+	"TeamID":         "0",
+	"TwoWay":         "0",
+}
+
+//LeagueLeaderRequiredFields outline the required fields for the query
+var LeagueLeaderRequiredFields = map[string]string{
+	"PerMode":      "PerGame",
+	"LeagueID":     "00",
+	"Scope":        "S",
+	"Season":       "2018-2019",
+	"SeasonType":   "RegularSeason",
+	"StatCategory": "PTS",
+}
+
 var (
 	//ErrNotEnoughCols is thrown if we have a raw message from the nba
 	//response that has more or less columns than we expect
