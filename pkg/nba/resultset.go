@@ -6,8 +6,7 @@ import (
 )
 
 //ResultSet represents the results we get back from the nba api
-//TODO: instead of json raw message, maybe make it a RawMessage
-//and unmarshal a unique response for each api endpoint?
+//I'm stupidly assuming that all the other stat.nba endpoints have a similar envelope
 type ResultSet struct {
 	Name    string              `json:"name"`
 	Headers []string            `json:"headers"`
@@ -20,7 +19,7 @@ type ResponseEnvelope struct {
 	ResultSet ResultSet `json:"resultSet"`
 }
 
-//LeageLeaderRow contains the info needed to destruct the league leader
+//LeagueLeaderRow contains the info needed to destruct the league leader
 //api response
 type LeagueLeaderRow struct {
 	PlayerID json.Number `json:"PLAYER_ID"`
@@ -56,7 +55,8 @@ var (
 )
 
 //UnmarshalRawMessage will take the response and convert it into a league
-//leader row. I'm not sure if this was a dumb idea yet
+//leader row.
+//I'm not sure if this was a dumb idea yet, but i'm leaning towards probably
 func (l *LeagueLeaderRow) UnmarshalRawMessage(bytes []json.RawMessage) error {
 	var err error
 	if len(bytes) != 24 {

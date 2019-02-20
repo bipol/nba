@@ -8,19 +8,27 @@ import (
 )
 
 const (
-	//LeagueLeadersEndpoint represents the stats nba endpoint for league leaders
+	//LeagueLeadersEndpoint represents the stats.nba endpoint for league leaders
 	LeagueLeadersEndpoint = "https://stats.nba.com/stats/leagueLeaders"
+	//PlayersEndpoint exposes all of the players in the nba, with general stats
+	//Note that this has a lot of filters -- see options.go
+	PlayersEndpoint = "https://stats.nba.com/stats/leaguedashplayerstats"
+	//PlayersDefenseDashboardEndpoint
+	PlayersDefenseDashboardEndpoint = "https://stats.nba.com/stats/leaguedashptdefend"
+
+	//js data endpoints
+	//these endpoints don't use the standard wrapper that the stats endpoints do
+	//and will require more work
+	//AdvancedLeadersEndpoint represents the stats.nba endpoint for advanced leaders
+	AdvancedLeadersEndpoint = "https://stats.nba.com/js/data/widgets/advanced_leaders.json"
+	//HustleLeadersEndpoint
+	HustleLeadersEndpoint = "https://stats.nba.com/js/data/widgets/hustle_leaders.json"
 )
 
 //API exposes stats.nba.com endpoints
+//
 type API interface {
-	GetLeagueLeaders()
-}
-
-type Doer interface {
-}
-
-type Logger interface {
+	GetLeagueLeaders(options ...APIOption) ([]LeagueLeaderRow, error)
 }
 
 //Client contains all the needed information to query the NBA API
@@ -87,6 +95,7 @@ func handleOptions(req *http.Request, options []APIOption) {
 	defaultArguments(req)
 }
 
+//TODO: Expose the other optionals here
 func defaultArguments(req *http.Request) {
 	q := req.URL.Query()
 	if _, ok := q["PerMode"]; !ok {
