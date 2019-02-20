@@ -38,9 +38,9 @@ func NewClient(client http.Client) Client {
 }
 
 //GetLeagueLeaders returns the current league leaders
-func (c *Client) GetLeagueLeaders(options ...APIOption) (ResultSet, error) {
-	var set ResultSet
-	req, err := http.NewRequest("GET", LeagueLeadersEndpoint, nil)
+func (c *Client) sendRequest(url string, options ...APIOption) (ResponseEnvelope, error) {
+	var set ResponseEnvelope
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return set, err
 	}
@@ -63,6 +63,23 @@ func (c *Client) GetLeagueLeaders(options ...APIOption) (ResultSet, error) {
 	return set, err
 }
 
+//GetLeagueLeaders returns the current league leaders
+func (c *Client) GetLeagueLeaders(options ...APIOption) ([]LeagueLeaderRow, error) {
+	var rows []LeagueLeaderRow
+	envelope, err := c.sendRequest(LeagueLeadersEndpoint, options...)
+	if err != nil {
+		return rows, err
+	}
+	for _, row := range envelope.ResultSet.RowSet {
+		var llRow LeagueLeaderRow
+		err = llRow.UnmarshalRawMessage(row)
+		if err == nil {
+			rows = append(rows, llRow)
+		}
+	}
+	return rows, err
+}
+
 func handleOptions(req *http.Request, options []APIOption) {
 	for _, option := range options {
 		option(req)
@@ -79,6 +96,6 @@ func defaultArguments(req *http.Request) {
 	q.Add("Scope", "S")
 	q.Add("Season", "2018-19")
 	q.Add("SeasonType", "Regular Season")
-	q.Add("StatsCategory", "PTS")
+	q.Add("StatCategory", "PTS")
 	req.URL.RawQuery = q.Encode()
 }
