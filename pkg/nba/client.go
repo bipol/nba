@@ -26,7 +26,7 @@ const (
 )
 
 //API exposes stats.nba.com endpoints
-//
+//go:generate counterfeiter . API
 type API interface {
 	GetLeagueLeaders(options ...APIOption) ([]LeagueLeaderRow, error)
 }
@@ -39,6 +39,7 @@ type Client struct {
 }
 
 //NewClient will an NBA Client
+//TODO: Pass in a logger here
 func NewClient(client http.Client) Client {
 	return Client{
 		client: client,
