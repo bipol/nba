@@ -10,17 +10,6 @@ import (
 //genericish way
 type APIOption = func(*http.Request)
 
-//League Leaders Parameters
-//also, below is the default for stats.nba
-/**
-LeagueID: 00
-PerMode: PerGame
-Scope: S
-Season: 2018-19
-SeasonType: Regular Season
-StatCategory: PTS
-**/
-
 //Players Endpoint Parameters
 //NOTE:  I think that all the players endpoints will use the same as these below
 //so we might just be able to dedupe and go from there?
@@ -64,9 +53,57 @@ VsDivision:
 Weight:
 **/
 
-//WithPerGameMode will query for the request on a per game basis
-func WithPerGameMode(req *http.Request) {
-	q := req.URL.Query()
-	q.Add("PerMode", "PerGame")
-	req.URL.RawQuery = q.Encode()
+// WithMode set the mode argument
+func WithMode(mode string) APIOption {
+	return func(req *http.Request) {
+		q := req.URL.Query()
+		q.Add("PerMode", mode)
+		req.URL.RawQuery = q.Encode()
+	}
+}
+
+// WithLeagueID sets the league argument
+func WithLeagueID(id string) APIOption {
+	return func(req *http.Request) {
+		q := req.URL.Query()
+		q.Add("LeagueID", id)
+		req.URL.RawQuery = q.Encode()
+	}
+}
+
+// WithScope sets the scope argument
+func WithScope(scope string) APIOption {
+	return func(req *http.Request) {
+		q := req.URL.Query()
+		q.Add("Scope", scope)
+		req.URL.RawQuery = q.Encode()
+	}
+
+}
+
+// DuringSeason sets the season argument
+func DuringSeason(season string) APIOption {
+	return func(req *http.Request) {
+		q := req.URL.Query()
+		q.Add("Season", season)
+		req.URL.RawQuery = q.Encode()
+	}
+}
+
+// WithSeasonType sets the season type argument
+func WithSeasonType(seasonType string) APIOption {
+	return func(req *http.Request) {
+		q := req.URL.Query()
+		q.Add("SeasonType", seasonType)
+		req.URL.RawQuery = q.Encode()
+	}
+}
+
+// WithStatCategory sets the stat type argument
+func WithStatCategory(stats string) APIOption {
+	return func(req *http.Request) {
+		q := req.URL.Query()
+		q.Add("StatsCategory", stats)
+		req.URL.RawQuery = q.Encode()
+	}
 }
