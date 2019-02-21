@@ -3,8 +3,9 @@ package nba
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http"
+
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -35,7 +36,6 @@ type API interface {
 //TODO: Change to interfaces
 type Client struct {
 	client http.Client
-	logger log.Logger
 }
 
 //NewClient will an NBA Client
@@ -53,6 +53,7 @@ func (c *Client) sendRequest(url string, required map[string]string, options ...
 	if err != nil {
 		return set, err
 	}
+	log.Debugf("request %s", req)
 	handleOptions(req, options, required)
 	resp, err := c.client.Do(req)
 	if err != nil {
@@ -63,6 +64,7 @@ func (c *Client) sendRequest(url string, required map[string]string, options ...
 	if err != nil {
 		return set, err
 	}
+	log.Debugf("body %s", body)
 
 	err = json.Unmarshal(body, &set)
 	if err != nil {

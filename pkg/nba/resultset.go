@@ -52,7 +52,7 @@ type LeagueLeaderRow struct {
 var PlayerRequiredFields = map[string]string{
 	"PerMode":        "PerGame",
 	"LeagueID":       "00",
-	"Season":         "2018-2019",
+	"Season":         "2018-19",
 	"SeasonType":     "Regular Season",
 	"LastNGames":     "0",
 	"MeasureType":    "Base",
@@ -71,8 +71,8 @@ var LeagueLeaderRequiredFields = map[string]string{
 	"PerMode":      "PerGame",
 	"LeagueID":     "00",
 	"Scope":        "S",
-	"Season":       "2018-2019",
-	"SeasonType":   "RegularSeason",
+	"Season":       "2018-19",
+	"SeasonType":   "Regular Season",
 	"StatCategory": "PTS",
 }
 

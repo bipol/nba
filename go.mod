@@ -40,7 +40,7 @@ require (
 	github.com/shurcooL/reactions v0.0.0-20181222204718-145cd5e7f3d1 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/shurcooL/webdavfs v0.0.0-20181215192745-5988b2d638f6 // indirect
-	github.com/sirupsen/logrus v1.3.0 // indirect
+	github.com/sirupsen/logrus v1.3.0
 	github.com/stretchr/testify v1.3.0 // indirect
 	go.opencensus.io v0.19.0 // indirect
 	go4.org v0.0.0-20190218023631-ce4c26f7be8e // indirect
