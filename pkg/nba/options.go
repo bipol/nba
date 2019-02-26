@@ -53,6 +53,20 @@ VsDivision:
 Weight:
 **/
 
+const (
+	Totals            = "Totals"
+	PerGame           = "PerGame"
+	MinutesPer        = "MinutesPer"
+	Per48             = "Per48"
+	Per40             = "Per40"
+	Per36             = "Per36"
+	PerMinute         = "PerMinute"
+	PerPossession     = "PerPossession"
+	PerPlay           = "PerPlay"
+	Per100Possessions = "Per100Possessions"
+	Per100Plays       = "Per100Plays"
+)
+
 // WithMode set the mode argument
 func WithMode(mode string) APIOption {
 	return func(req *http.Request) {
@@ -104,6 +118,33 @@ func WithStatCategory(stats string) APIOption {
 	return func(req *http.Request) {
 		q := req.URL.Query()
 		q.Add("StatsCategory", stats)
+		req.URL.RawQuery = q.Encode()
+	}
+}
+
+const (
+	// (F)|(C)|(G)|(C-F)|(F-C)|(F-G)|(G-F)
+	// Forward
+	Forward = "F"
+	// Center
+	Center = "C"
+	// Guard
+	Guard = "G"
+	//Stretch?
+	CenterForward = "C-F"
+	// ForwardCenter
+	ForwardCenter = "F-C"
+	// ForwardGuard
+	ForwardGuard = "F-G"
+	// GuardForward
+	GuardForward = "G-F"
+)
+
+// ForPlayerPosition sets the player position argument
+func ForPlayerPosition(name string) APIOption {
+	return func(req *http.Request) {
+		q := req.URL.Query()
+		q.Add("PlayerPosition", name)
 		req.URL.RawQuery = q.Encode()
 	}
 }

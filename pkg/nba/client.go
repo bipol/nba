@@ -2,8 +2,10 @@ package nba
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/http/httptrace"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -49,12 +51,31 @@ func NewClient(client http.Client) Client {
 //GetLeagueLeaders returns the current league leaders
 func (c *Client) sendRequest(url string, required map[string]string, options ...APIOption) (ResponseEnvelope, error) {
 	var set ResponseEnvelope
+	trace := &httptrace.ClientTrace{
+		DNSDone: func(dnsInfo httptrace.DNSDoneInfo) {
+			fmt.Printf("DNS Info: %+v\n", dnsInfo)
+		},
+		GotConn: func(connInfo httptrace.GotConnInfo) {
+			fmt.Printf("Got Conn: %+v\n", connInfo)
+		},
+		GotFirstResponseByte: func() {
+			fmt.Printf("Got First Byte\n")
+		},
+		Got100Continue: func() {
+			fmt.Printf("Got 100 Continue\n")
+		},
+		Wait100Continue: func() {
+			fmt.Printf("Wait 100 Continue\n")
+		},
+	}
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return set, err
 	}
-	log.Debugf("request %s", req)
+	req = req.WithContext(httptrace.WithClientTrace(req.Context(), trace))
 	handleOptions(req, options, required)
+	addHeaders(req)
+	log.Debugf("request %v", req)
 	resp, err := c.client.Do(req)
 	if err != nil {
 		return set, err
@@ -64,7 +85,6 @@ func (c *Client) sendRequest(url string, required map[string]string, options ...
 	if err != nil {
 		return set, err
 	}
-	log.Debugf("body %s", body)
 
 	err = json.Unmarshal(body, &set)
 	if err != nil {
@@ -92,20 +112,30 @@ func (c *Client) GetLeagueLeaders(options ...APIOption) ([]LeagueLeaderRow, erro
 }
 
 //GetPlayerStats will return player stats
-func (c *Client) GetPlayerStats(options ...APIOption) ([]LeagueLeaderRow, error) {
-	var rows []LeagueLeaderRow
+//TODO: Figure out the best way to return these stats...
+//do we delay the actual processing and defer that to the user?
+//that seems like a mostly useless thing to do
+func (c *Client) GetPlayerStats(options ...APIOption) ([][]json.RawMessage, error) {
+	var rows [][]json.RawMessage
 	envelope, err := c.sendRequest(PlayersEndpoint, PlayerRequiredFields, options...)
 	if err != nil {
 		return rows, err
 	}
-	for _, row := range envelope.ResultSet.RowSet {
-		var llRow LeagueLeaderRow
-		err = llRow.UnmarshalRawMessage(row)
-		if err == nil {
-			rows = append(rows, llRow)
+	//TODO: How to handle multi result sets?
+	if len(envelope.ResultSets) > 0 {
+		for _, row := range envelope.ResultSets {
+			for _, result := range row.RowSet {
+				rows = append(rows, result)
+			}
 		}
 	}
 	return rows, err
+}
+
+func addHeaders(req *http.Request) {
+	req.Header.Set("Accept", "application/json")
+	//Fake User Agent??
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36")
 }
 
 func handleOptions(req *http.Request, options []APIOption, required map[string]string) {

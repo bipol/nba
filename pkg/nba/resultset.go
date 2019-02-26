@@ -14,9 +14,11 @@ type ResultSet struct {
 }
 
 //ResponseEnvelope is the wrapper around the result set that the nba api
-//returns
+//TODO: maybe i don't expose this dude to the world and just use it internally
+//to help with the multi response bodies?
 type ResponseEnvelope struct {
-	ResultSet ResultSet `json:"resultSet"`
+	ResultSet  ResultSet   `json:"resultSet"`
+	ResultSets []ResultSet `json:"resultSets"`
 }
 
 //LeagueLeaderRow contains the info needed to destruct the league leader
@@ -49,21 +51,31 @@ type LeagueLeaderRow struct {
 }
 
 //PlayerRequiredFields outline the required fields for the query
+//TODO convert this stuff to consts?
 var PlayerRequiredFields = map[string]string{
-	"PerMode":        "PerGame",
-	"LeagueID":       "00",
-	"Season":         "2018-19",
-	"SeasonType":     "Regular Season",
-	"LastNGames":     "0",
-	"MeasureType":    "Base",
-	"Month":          "0",
-	"OpponentTeamID": "0",
-	"PORound":        "0",
-	"PaceAdjust":     "N",
-	"Period":         "0",
-	"PlusMinus":      "N",
-	"TeamID":         "0",
-	"TwoWay":         "0",
+	"DateFrom":         "",
+	"DateTo":           "",
+	"GameScope":        "",
+	"GameSegment":      "",
+	"LastNGames":       "0",
+	"Location":         "",
+	"MeasureType":      "Base",
+	"Month":            "0",
+	"OpponentTeamID":   "0",
+	"Outcome":          "",
+	"PaceAdjust":       "N",
+	"PerMode":          "PerGame",
+	"Period":           "0",
+	"PlayerExperience": "",
+	"PlayerPosition":   "",
+	"PlusMinus":        "N",
+	"Rank":             "N",
+	"Season":           "2018-19",
+	"SeasonSegment":    "",
+	"SeasonType":       "Regular Season",
+	"StarterBench":     "",
+	"VsConference":     "",
+	"VsDivision":       "",
 }
 
 //LeagueLeaderRequiredFields outline the required fields for the query
