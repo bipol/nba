@@ -26,6 +26,12 @@ const (
 	AdvancedLeadersEndpoint = "https://stats.nba.com/js/data/widgets/advanced_leaders.json"
 	//HustleLeadersEndpoint
 	HustleLeadersEndpoint = "https://stats.nba.com/js/data/widgets/hustle_leaders.json"
+
+	//DailyGameLineups allows you to search for the current days games in YYYYMMDD
+	DailyGameLineups = "https://stats.nba.com/js/data/widgets/daily_lineups_%s.json"
+
+	//FullGamePlayByPlay allws you to pull current game data with the GameID
+	FullGamePlayByPlay = "https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/scores/pbp/%s_full_pbp.json"
 )
 
 //API exposes stats.nba.com endpoints
@@ -101,35 +107,23 @@ func (c *Client) GetLeagueLeaders(options ...APIOption) ([]LeagueLeaderRow, erro
 	if err != nil {
 		return rows, err
 	}
-	for _, row := range envelope.ResultSet.RowSet {
-		var llRow LeagueLeaderRow
-		err = llRow.UnmarshalRawMessage(row)
-		if err == nil {
-			rows = append(rows, llRow)
-		}
+	err = json.Unmarshal([]byte(envelope.ResultSet.RowSet), &rows)
+	if err != nil {
+		return rows, err
 	}
+
 	return rows, err
 }
 
 //GetPlayerStats will return player stats
 //TODO: Figure out the best way to return these stats...
 //do we delay the actual processing and defer that to the user?
-//that seems like a mostly useless thing to do
-func (c *Client) GetPlayerStats(options ...APIOption) ([][]json.RawMessage, error) {
-	var rows [][]json.RawMessage
+func (c *Client) GetPlayerStats(options ...APIOption) (ResponseEnvelope, error) {
 	envelope, err := c.sendRequest(PlayersEndpoint, PlayerRequiredFields, options...)
 	if err != nil {
-		return rows, err
+		return envelope, err
 	}
-	//TODO: How to handle multi result sets?
-	if len(envelope.ResultSets) > 0 {
-		for _, row := range envelope.ResultSets {
-			for _, result := range row.RowSet {
-				rows = append(rows, result)
-			}
-		}
-	}
-	return rows, err
+	return envelope, err
 }
 
 func addHeaders(req *http.Request) {

@@ -8,9 +8,9 @@ import (
 //ResultSet represents the results we get back from the nba api
 //I'm stupidly assuming that all the other stat.nba endpoints have a similar envelope
 type ResultSet struct {
-	Name    string              `json:"name"`
-	Headers []string            `json:"headers"`
-	RowSet  [][]json.RawMessage `json:"rowSet"`
+	Name    string          `json:"name"`
+	Headers []string        `json:"headers"`
+	RowSet  json.RawMessage `json:"rowSet"`
 }
 
 //ResponseEnvelope is the wrapper around the result set that the nba api
@@ -94,127 +94,136 @@ var (
 	ErrNotEnoughCols = errors.New("not enough rows to process")
 )
 
-//UnmarshalRawMessage will take the response and convert it into a league
+//UnmarshalJSON will take the response and convert it into a league
 //leader row.
-//I'm not sure if this was a dumb idea yet, but i'm leaning towards probably
-func (l *LeagueLeaderRow) UnmarshalRawMessage(bytes []json.RawMessage) error {
-	var err error
-	if len(bytes) != 24 {
+func (l *LeagueLeaderRow) UnmarshalJSON(bytes []byte) error {
+	var (
+		err        error
+		rawMessage []json.RawMessage
+	)
+
+	err = json.Unmarshal(bytes, &rawMessage)
+	if err != nil {
+		return err
+	}
+
+	if len(rawMessage) != 24 {
 		return ErrNotEnoughCols
 	}
-	err = json.Unmarshal(bytes[0], &l.PlayerID)
+
+	err = json.Unmarshal(rawMessage[0], &l.PlayerID)
 	if err != nil {
 		return err
 	}
-	err = json.Unmarshal(bytes[1], &l.Rank)
+	err = json.Unmarshal(rawMessage[1], &l.Rank)
 	if err != nil {
 		return err
 	}
-	err = json.Unmarshal(bytes[2], &l.Player)
+	err = json.Unmarshal(rawMessage[2], &l.Player)
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal(bytes[3], &l.Team)
+	err = json.Unmarshal(rawMessage[3], &l.Team)
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal(bytes[4], &l.Gp)
+	err = json.Unmarshal(rawMessage[4], &l.Gp)
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal(bytes[5], &l.Min)
+	err = json.Unmarshal(rawMessage[5], &l.Min)
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal(bytes[6], &l.Fgm)
+	err = json.Unmarshal(rawMessage[6], &l.Fgm)
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal(bytes[7], &l.Fga)
+	err = json.Unmarshal(rawMessage[7], &l.Fga)
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal(bytes[8], &l.FgPCT)
+	err = json.Unmarshal(rawMessage[8], &l.FgPCT)
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal(bytes[9], &l.Fg3m)
+	err = json.Unmarshal(rawMessage[9], &l.Fg3m)
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal(bytes[10], &l.Fg3a)
+	err = json.Unmarshal(rawMessage[10], &l.Fg3a)
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal(bytes[11], &l.Fg3PCT)
+	err = json.Unmarshal(rawMessage[11], &l.Fg3PCT)
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal(bytes[12], &l.Ftm)
+	err = json.Unmarshal(rawMessage[12], &l.Ftm)
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal(bytes[13], &l.Fta)
+	err = json.Unmarshal(rawMessage[13], &l.Fta)
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal(bytes[14], &l.FtPCT)
+	err = json.Unmarshal(rawMessage[14], &l.FtPCT)
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal(bytes[15], &l.Oreb)
+	err = json.Unmarshal(rawMessage[15], &l.Oreb)
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal(bytes[16], &l.Dreb)
+	err = json.Unmarshal(rawMessage[16], &l.Dreb)
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal(bytes[17], &l.Reb)
+	err = json.Unmarshal(rawMessage[17], &l.Reb)
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal(bytes[18], &l.Ast)
+	err = json.Unmarshal(rawMessage[18], &l.Ast)
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal(bytes[19], &l.Stl)
+	err = json.Unmarshal(rawMessage[19], &l.Stl)
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal(bytes[20], &l.Blk)
+	err = json.Unmarshal(rawMessage[20], &l.Blk)
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal(bytes[21], &l.Tov)
+	err = json.Unmarshal(rawMessage[21], &l.Tov)
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal(bytes[22], &l.Pts)
+	err = json.Unmarshal(rawMessage[22], &l.Pts)
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal(bytes[23], &l.Eff)
+	err = json.Unmarshal(rawMessage[23], &l.Eff)
 	return err
 }
