@@ -76,6 +76,19 @@ func WithMode(mode string) APIOption {
 	}
 }
 
+const (
+	AtlantaHawks = "1610612737"
+)
+
+// WithTeamID sets the team argument
+func WithTeamID(id string) APIOption {
+	return func(req *http.Request) {
+		q := req.URL.Query()
+		q.Add("TeamID", id)
+		req.URL.RawQuery = q.Encode()
+	}
+}
+
 // WithLeagueID sets the league argument
 func WithLeagueID(id string) APIOption {
 	return func(req *http.Request) {

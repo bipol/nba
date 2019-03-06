@@ -16,6 +16,7 @@ const (
 	//PlayersEndpoint exposes all of the players in the nba, with general stats
 	//Note that this has a lot of filters -- see options.go
 	PlayersEndpoint = "https://stats.nba.com/stats/leaguedashplayerstats"
+
 	//PlayersDefenseDashboardEndpoint
 	PlayersDefenseDashboardEndpoint = "https://stats.nba.com/stats/leaguedashptdefend"
 
@@ -118,12 +119,21 @@ func (c *Client) GetLeagueLeaders(options ...APIOption) ([]LeagueLeaderRow, erro
 //GetPlayerStats will return player stats
 //TODO: Figure out the best way to return these stats...
 //do we delay the actual processing and defer that to the user?
-func (c *Client) GetPlayerStats(options ...APIOption) (ResponseEnvelope, error) {
+func (c *Client) GetPlayerStats(options ...APIOption) ([]PlayerRow, error) {
+	var rows []PlayerRow
 	envelope, err := c.sendRequest(PlayersEndpoint, PlayerRequiredFields, options...)
 	if err != nil {
-		return envelope, err
+		return rows, err
 	}
-	return envelope, err
+	for _, set := range envelope.ResultSets {
+		var temp []PlayerRow
+		err = json.Unmarshal([]byte(set.RowSet), &temp)
+		if err != nil {
+			return rows, err
+		}
+		rows = append(rows, temp...)
+	}
+	return rows, err
 }
 
 func addHeaders(req *http.Request) {
