@@ -10,11 +10,13 @@ import (
 func main() {
 	httpClient := http.Client{}
 	client := nba.NewClient(httpClient)
-	set, err := client.GetLeagueLeaders(
-		nba.DuringSeason("2016-17"),
+	res, err := client.GetPlayerStats(
+		nba.DuringSeason("2018-19"),
+		nba.ForPlayerPosition(nba.Forward),
+		nba.WithTeamID(nba.AtlantaHawks),
 	)
 	if err != nil {
 		panic(err)
 	}
-	spew.Dump(set)
+	spew.Dump(res)
 }
