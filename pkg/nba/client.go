@@ -3,9 +3,8 @@ package nba
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
-	"net/http/httptrace"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -55,31 +54,16 @@ func NewClient(client http.Client) Client {
 	}
 }
 
+//TODO: should I pass in a "response type" argument here
+//so that I can deal with the `json` endpoints and the normal api endpoints?
+//they'd have to conform to a generic "Response Envelope", or something like that...
 //GetLeagueLeaders returns the current league leaders
 func (c *Client) sendRequest(url string, required map[string]string, options ...APIOption) (ResponseEnvelope, error) {
 	var set ResponseEnvelope
-	trace := &httptrace.ClientTrace{
-		DNSDone: func(dnsInfo httptrace.DNSDoneInfo) {
-			fmt.Printf("DNS Info: %+v\n", dnsInfo)
-		},
-		GotConn: func(connInfo httptrace.GotConnInfo) {
-			fmt.Printf("Got Conn: %+v\n", connInfo)
-		},
-		GotFirstResponseByte: func() {
-			fmt.Printf("Got First Byte\n")
-		},
-		Got100Continue: func() {
-			fmt.Printf("Got 100 Continue\n")
-		},
-		Wait100Continue: func() {
-			fmt.Printf("Wait 100 Continue\n")
-		},
-	}
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return set, err
 	}
-	req = req.WithContext(httptrace.WithClientTrace(req.Context(), trace))
 	handleOptions(req, options, required)
 	addHeaders(req)
 	log.Debugf("request %v", req)
@@ -88,17 +72,30 @@ func (c *Client) sendRequest(url string, required map[string]string, options ...
 		return set, err
 	}
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return set, err
-	}
-
-	err = json.Unmarshal(body, &set)
+	err = json.NewDecoder(resp.Body).Decode(&set)
 	if err != nil {
 		return set, err
 	}
 
 	return set, err
+}
+
+//GetDailyGameLineup will return today's lineups
+//the time format should be `20060102`
+func (c *Client) GetDailyGameLineup(forDate time.Time, options ...APIOption) ([]DailyGameLineupRow, error) {
+	var rows []DailyGameLineupRow
+	expectedTimeFormat := "20060102"
+	formattedDate := forDate.Format(expectedTimeFormat)
+	envelope, err := c.sendRequest(fmt.Sprintf(DailyGameLineups, formattedDate), NoRequiredFields, options...)
+	if err != nil {
+		return rows, err
+	}
+	err = json.Unmarshal([]byte(envelope.Results), &rows)
+	if err != nil {
+		return rows, err
+	}
+
+	return rows, nil
 }
 
 //GetLeagueLeaders returns the current league leaders

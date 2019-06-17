@@ -2,6 +2,7 @@ package nba
 
 import (
 	"net/http"
+	"net/http/httptrace"
 )
 
 //APIOption is an option that affects the request
@@ -53,6 +54,7 @@ VsDivision:
 Weight:
 **/
 
+// Stats
 const (
 	Totals            = "Totals"
 	PerGame           = "PerGame"
@@ -76,6 +78,14 @@ func WithMode(mode string) APIOption {
 	}
 }
 
+// WithDebugTrace sets a debug trace
+func WithDebugTrace(trace *httptrace.ClientTrace) APIOption {
+	return func(req *http.Request) {
+		req = req.WithContext(httptrace.WithClientTrace(req.Context(), trace))
+	}
+}
+
+// Teams
 const (
 	AtlantaHawks = "1610612737"
 )
@@ -135,6 +145,7 @@ func WithStatCategory(stats string) APIOption {
 	}
 }
 
+// Player Positions
 const (
 	// (F)|(C)|(G)|(C-F)|(F-C)|(F-G)|(G-F)
 	// Forward
@@ -143,7 +154,7 @@ const (
 	Center = "C"
 	// Guard
 	Guard = "G"
-	//Stretch?
+	// CenterForward
 	CenterForward = "C-F"
 	// ForwardCenter
 	ForwardCenter = "F-C"

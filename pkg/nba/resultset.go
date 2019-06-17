@@ -17,8 +17,15 @@ type ResultSet struct {
 //TODO: maybe i don't expose this dude to the world and just use it internally
 //to help with the multi response bodies?
 type ResponseEnvelope struct {
-	ResultSet  ResultSet   `json:"resultSet"`
-	ResultSets []ResultSet `json:"resultSets"`
+	Results    json.RawMessage `json:"results"`
+	ResultSet  ResultSet       `json:"resultSet"`
+	ResultSets []ResultSet     `json:"resultSets"`
+}
+
+//TODO: Expand struct
+type DailyGameLineupRow struct {
+	Game   string `json:"Game"`
+	GameID string `json:"GameID"`
 }
 
 //PlayerRow contains the info needed to destruct the player
@@ -424,6 +431,9 @@ var PlayerRequiredFields = map[string]string{
 	"VsConference":     "",
 	"VsDivision":       "",
 }
+
+//NoRequiredFields outlines no required fields
+var NoRequiredFields = map[string]string{}
 
 //LeagueLeaderRequiredFields outline the required fields for the query
 var LeagueLeaderRequiredFields = map[string]string{
