@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -66,7 +64,6 @@ func (c *Client) sendRequest(url string, required map[string]string, options ...
 	}
 	handleOptions(req, options, required)
 	addHeaders(req)
-	log.Debugf("request %v", req)
 	resp, err := c.client.Do(req)
 	if err != nil {
 		return set, err

@@ -81,7 +81,7 @@ func WithMode(mode string) APIOption {
 // WithDebugTrace sets a debug trace
 func WithDebugTrace(trace *httptrace.ClientTrace) APIOption {
 	return func(req *http.Request) {
-		req = req.WithContext(httptrace.WithClientTrace(req.Context(), trace))
+		*req = *req.WithContext(httptrace.WithClientTrace(req.Context(), trace))
 	}
 }
 
